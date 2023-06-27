@@ -1,0 +1,30 @@
+<quartz>
+    <job>
+        <job-detail>
+            <name>SendMailInventarioJob</name>
+            <group>SendMailInventarioJob</group>
+            <description>Job para envio de email con inventario a clientes.</description>
+            <job-class>com.ferbo.cron.SendMailInventarioJob</job-class>
+            <job-data-map allows-transient-data="false">
+                <entry>
+                    <key>arg1</key>
+                    <value>nothing</value>
+                </entry>
+                <entry>
+                	<key>arg2</key>
+                    <value>nothing</value>
+                </entry>
+            </job-data-map>
+        </job-detail>
+        <trigger>
+            <cron>
+                <name>SendMailInventarioTrigger</name>
+                <group>SendMailInventarioTriggerGroup</group>
+                <job-name>SendMailInventarioJob</job-name>
+                <job-group>SendMailInventarioGroup</job-group>
+                <!-- Se dispara cada segundos minutos horas DiaDelMes Mes DiaDeLaSemana Año -->
+                <cron-expression>0 * * * * ? *</cron-expression>
+            </cron>
+        </trigger>
+    </job>
+</quartz>
