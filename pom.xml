@@ -88,4 +88,11 @@
 			</plugin>
 		</plugins>
 	</build>
+	<distributionManagement>
+		<repository>
+			<id>github</id>
+			<name>GitHub eabadillom Apache Maven Packages</name>
+			<url>https://maven.pkg.github.com/eabadillom/gestion-cron</url>
+		</repository>
+	</distributionManagement>
 </project>
