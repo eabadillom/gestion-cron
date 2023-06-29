@@ -7,10 +7,7 @@ import java.sql.Connection;
 import java.sql.SQLException;
 import java.util.ArrayList;
 import java.util.Date;
-import java.util.HashMap;
 import java.util.List;
-import java.util.Locale;
-import java.util.Map;
 
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
@@ -19,7 +16,7 @@ import com.ferbo.gestion.business.ClienteBL;
 import com.ferbo.gestion.business.ContactosBL;
 import com.ferbo.gestion.business.InventarioBO;
 import com.ferbo.gestion.dao.MailDAO;
-import com.ferbo.gestion.jasper.JasperBL;
+import com.ferbo.gestion.jasper.ReporteInventarioJR;
 import com.ferbo.gestion.model.Cliente;
 import com.ferbo.gestion.model.ClienteContacto;
 import com.ferbo.gestion.model.ConstanciaDeposito;
@@ -27,7 +24,6 @@ import com.ferbo.gestion.model.Contacto;
 import com.ferbo.gestion.model.Mail;
 import com.ferbo.gestion.model.MedioContacto;
 import com.ferbo.gestion.tools.DBManager;
-import com.ferbo.gestion.tools.GestionException;
 import com.ferbo.gestion.tools.IOTools;
 import com.ferbo.mail.MailHelper;
 import com.ferbo.mail.beans.Adjunto;
@@ -145,7 +141,7 @@ public class SendMailInventarioBL {
 				continue;
 			}
 			
-			Mail mail = mailDAO.get(conn, medio.getMail().getIdMail());
+			Mail mail = mailDAO.get(conn, medio.getIdMail());
 			String destinatario = String.format("%s %s %s", contacto.getNombre(), contacto.getApellido1(), contacto.getApellido2());
 			Correo correo = new Correo(mail.getMail(), destinatario);
 			correosList.add(correo);
@@ -167,12 +163,16 @@ public class SendMailInventarioBL {
 		
 		byte[]         bytes = null;
 		List<Adjunto> attachmentList = null;
+		ReporteInventarioJR inventarioJR = null;
+		
+		String logoPath = null;
+		File   fileLogoPath = null;
 		
 		try {
 		    helper.newMessage();
 		    subject = String.format("Reporte de inventario %s - FERBO", this.clienteActual.getNombre());
 		    
-		    mailInventarioHTML = "/resources/mailInventario.html";
+		    mailInventarioHTML = "/mail/mailInventario.html";
             mailInventarioFile = new File( getClass().getResource(mailInventarioHTML).getFile() );
             mailInventarioReader = new FileReader(mailInventarioFile);
             reader = new BufferedReader(mailInventarioReader);
@@ -199,13 +199,16 @@ public class SendMailInventarioBL {
                 return;
             
             log.info(String.format("Constancias con inventario: %d", constanciasConSaldo.size()));
+            logoPath = "/images/logo.png";
+            fileLogoPath = new File( getClass().getResource(logoPath).getFile());
+            inventarioJR = new ReporteInventarioJR(conn, fileLogoPath.getPath());
             
-            bytes = this.getPDFReporteInventario(contactosBO.getIdCliente(), null) ;
+            bytes = inventarioJR.getPDFReporteInventario(contactosBO.getIdCliente(), null) ;
             String nombrePDF = String.format("ReporteInventario.pdf");
             adjunto = new Adjunto(nombrePDF, Adjunto.TP_ARCHIVO_PDF, bytes);
             helper.addAttachment(adjunto);
             
-            bytes = this.getXLSReporteInventario(contactosBO.getIdCliente(), null);
+            bytes = inventarioJR.getXLSReporteInventario(contactosBO.getIdCliente(), null);
             String nombreXLS = String.format("ReporteInventario.xls");
             adjunto = new Adjunto(nombreXLS, Adjunto.TP_ARCHIVO_XLS, bytes);
             helper.addAttachment(adjunto);
@@ -230,83 +233,4 @@ public class SendMailInventarioBL {
 		}
 		
 	}
-	
-	public byte[] getPDFReporteInventario(Integer idCliente, Integer idPlanta) throws GestionException {
-		byte[] bytes = null;
-		
-		Date                fecha = new Date();
-        String              reportNameJASPER = null;
-        File                reportFile = null;
-        Map<String, Object> jrParams = null;
-        
-        JasperBL jasperBO = new JasperBL();
-        
-        try {
-            
-            String logoPath = "/jasper/logo.png";
-            File logoFile = new File(getClass().getResource(logoPath).getFile());
-            log.info("Ruta logo: " + logoFile.getPath());
-            if(logoFile.exists() == false)
-                log.error("El archivo no existe: " + logoFile.getPath());
-            
-            reportNameJASPER = "/com/hoth/jasper/inventario/inventario.jasper";
-            reportFile       = new File( getClass().getResource(reportNameJASPER).getFile() );
-            
-            jrParams = new HashMap<String, Object>();
-            jrParams.put("REPORT_CONNECTION", conn);
-            jrParams.put("imagen", logoPath);
-            jrParams.put("idCliente", String.valueOf(idCliente));
-            jrParams.put("fecha", fecha);
-            jrParams.put("camara", null);
-            jrParams.put("planta", idPlanta);
-            jrParams.put("REPORT_LOCALE", new Locale("es", "MX"));
-            
-            bytes = jasperBO.createPDF(jrParams, reportFile.getPath());
-            
-        } catch(Exception ex) {
-            throw new GestionException("Problema en el procesamiento del reporte de inventario (PDF)...", ex);
-        }
-        
-        return bytes;
-	}
-	
-	public byte[] getXLSReporteInventario(Integer idCliente, Integer idPlanta) throws GestionException {
-		byte[] bytes = null;
-		
-		Date                fecha = new Date();
-        String              reportNameJASPER = null;
-        File                reportFile = null;
-        Map<String, Object> jrParams = null;
-        
-        JasperBL jasperBO = new JasperBL();
-        
-        try {
-            
-            String logoPath = "/jasper/logo.png";
-            File logoFile = new File(getClass().getResource(logoPath).getFile());
-            log.info("Ruta logo: " + logoFile.getPath());
-            if(logoFile.exists() == false)
-                log.error("El archivo no existe: " + logoFile.getPath());
-            
-            reportNameJASPER = "/com/hoth/jasper/inventario/inventario.jasper";
-            reportFile       = new File( getClass().getResource(reportNameJASPER).getFile() );
-            
-            jrParams = new HashMap<String, Object>();
-            jrParams.put("REPORT_CONNECTION", conn);
-            jrParams.put("imagen", logoPath);
-            jrParams.put("idCliente", String.valueOf(idCliente));
-            jrParams.put("fecha", fecha);
-            jrParams.put("camara", null);
-            jrParams.put("planta", idPlanta);
-            jrParams.put("REPORT_LOCALE", new Locale("es", "MX"));
-            
-            bytes = jasperBO.createXLSX(jrParams, reportFile.getPath());
-            
-        } catch(Exception ex) {
-            throw new GestionException("Problema en el procesamiento del reporte de inventario (PDF)...", ex);
-        }
-        
-        return bytes;
-	}
- 
 }
