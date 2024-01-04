@@ -19,7 +19,6 @@ import com.ferbo.gestion.dao.MailDAO;
 import com.ferbo.gestion.jasper.ReporteInventarioJR;
 import com.ferbo.gestion.model.Cliente;
 import com.ferbo.gestion.model.ClienteContacto;
-import com.ferbo.gestion.model.ConstanciaDeposito;
 import com.ferbo.gestion.model.Contacto;
 import com.ferbo.gestion.model.Mail;
 import com.ferbo.gestion.model.MedioContacto;
@@ -67,7 +66,6 @@ public class SendMailInventarioBL {
 	    List<Cliente> clientes = null;
 	    ClienteBL clienteBO = null;
 	    try {
-	        //TODO verificar en que proyecto se ubicará el DataSourceManager...
 	        this.conn = DBManager.getConnection();
 	        
 	        clienteBO = new ClienteBL(conn);
@@ -157,9 +155,7 @@ public class SendMailInventarioBL {
 		StringBuilder  sb = null;
 		String         subject = null;
 		Adjunto        adjunto = null;
-		//Planta[]       plantas = null;
 		InventarioBO   inventarioBO = null;
-		List<ConstanciaDeposito> constanciasConSaldo = null;
 		
 		byte[]         bytes = null;
 		List<Adjunto> attachmentList = null;
@@ -191,14 +187,12 @@ public class SendMailInventarioBL {
             helper.setMailBody(html);
 		    
             
-            //plantas = PlantaManager.getPlantas(conn);
             inventarioBO = new InventarioBO(conn);
-            constanciasConSaldo = inventarioBO.getDepositosAlCorte(contactosBO.getIdCliente(), new Date());
                 
-            if(constanciasConSaldo == null || constanciasConSaldo.size() == 0)
-                return;
+            if(inventarioBO.tieneInventario(contactosBO.getIdCliente(), new Date()) == false)
+            	return;
             
-            log.info(String.format("Constancias con inventario: %d", constanciasConSaldo.size()));
+            log.info(String.format("El cliente tiene inventario."));
             logoPath = "/images/logo.png";
             fileLogoPath = new File( getClass().getResource(logoPath).getFile());
             inventarioJR = new ReporteInventarioJR(conn, fileLogoPath.getPath());
