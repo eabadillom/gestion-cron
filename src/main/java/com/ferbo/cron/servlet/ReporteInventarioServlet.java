@@ -15,11 +15,14 @@ import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 
 import com.ferbo.cron.business.SendMailInventarioBL;
+import com.ferbo.cron.model.SendMailRsp;
 import com.ferbo.gestion.business.ClienteBL;
 import com.ferbo.gestion.jasper.ReporteInventarioJR;
 import com.ferbo.gestion.model.Cliente;
 import com.ferbo.gestion.tools.DBManager;
 import com.ferbo.gestion.tools.FSTools;
+import com.google.gson.Gson;
+import com.google.gson.GsonBuilder;
 
 /**
  * Servlet implementation class ReporteInventarioServlet
@@ -81,21 +84,31 @@ public class ReporteInventarioServlet extends HttpServlet {
 	 */
 	protected void doPost(HttpServletRequest request, HttpServletResponse response) throws ServletException, IOException {
 		
-		String numeroCliente = null;
-		SendMailInventarioBL mailBO = null;
-		List<Cliente> clientes = null;
-		ClienteBL clienteBO = null;
-		Cliente cliente = null;
+		String               numeroCliente = null;
+		SendMailInventarioBL mailBO        = null;
+		List<Cliente>        clientes      = null;
+		ClienteBL            clienteBO     = null;
+		Cliente              cliente       = null;
+		Connection           conn          = null;
+		String               mensaje       = null;
 		
-		Connection conn = null;
+		Gson                 prettyGson    = null;
+		String               jsonResponse  = null;
+		SendMailRsp          respuesta     = null;
+		Integer              httpStatus    = -1;
 		
 		try {
+			respuesta = new SendMailRsp();
+			prettyGson = new GsonBuilder().setPrettyPrinting().create();
+			
 			numeroCliente = request.getParameter("numeroCliente");
 			mailBO = SendMailInventarioBL.getInstance();
 			conn = DBManager.getConnection();
 			
 			if(numeroCliente == null || "".equals(numeroCliente.trim())) {
 				mailBO.exec();
+				
+				mensaje = "El reproceso terminó correctamente.";
 			} else {
 				clienteBO = new ClienteBL(conn);
 				cliente = clienteBO.get(numeroCliente);
@@ -103,13 +116,27 @@ public class ReporteInventarioServlet extends HttpServlet {
 				clientes.add(cliente);
 				mailBO.setConn(conn);
 				mailBO.sendMail(clientes);
+				
+				mensaje = String.format("El reproceso de numeroCliente = %s terminó correctamente.", numeroCliente);
 			}
 			
+			respuesta.setCode(0);
+			respuesta.setMessage(mensaje);
+			httpStatus = HttpServletResponse.SC_OK;
 		} catch(Exception ex) {
 			log.error("Problema con el envío de los reportes de inventario automáticos...", ex);
+			respuesta.setCode(1);
+			respuesta.setMessage("El envío de reportes tuvo un problema. Verifique las bitácoras.");
+			httpStatus = HttpServletResponse.SC_INTERNAL_SERVER_ERROR;
 		} finally {
 			DBManager.close(conn);
+			jsonResponse = prettyGson.toJson(respuesta);
+			
+			response.setStatus(httpStatus);
+            response.setContentType("application/json");
+            response.setCharacterEncoding("UTF-8");
+            response.getWriter().print(jsonResponse);
+            response.getWriter().flush();
 		}
 	}
-
 }

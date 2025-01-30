@@ -32,6 +32,11 @@
 			<artifactId>gestion-mail</artifactId>
 			<version>0.0.2-SNAPSHOT</version>
 		</dependency>
+		<dependency>
+			<groupId>com.google.code.gson</groupId>
+		    <artifactId>gson</artifactId>
+		    <version>2.11.0</version>
+		</dependency>
 		<!-- https://mvnrepository.com/artifact/javax.servlet/javax.servlet-api -->
 		<dependency>
 			<groupId>javax.servlet</groupId>
@@ -70,6 +75,13 @@
 			<version>2.1</version>
 		</dependency>
 	</dependencies>
+	<repositories>
+		<repository>
+			<id>github</id>
+			<name>github</name>
+			<url>https://maven.pkg.github.com/eabadillom/*</url>
+		</repository>
+	</repositories>
 	<build>
 		<finalName>gestion-cron</finalName>
 		<plugins>
