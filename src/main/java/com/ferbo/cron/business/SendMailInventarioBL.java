@@ -90,6 +90,7 @@ public class SendMailInventarioBL {
 	    
 		for(Cliente cliente : clientes) {
 			this.clienteActual = cliente;
+			log.info("----------------------------------------------------------------------------------");
 			log.info("Cliente: " + cliente.getNombre());
 			this.processContacts(cliente);
 		}
@@ -219,6 +220,8 @@ public class SendMailInventarioBL {
             }
             
 			helper.addMessage();
+			
+			log.info("El mensaje se agregó a la cola de envío de correos.");
 			
 		} catch(Exception ex) {
 			log.error("Problema para generar el mensaje de correo electrónico...", ex);
