@@ -23,7 +23,7 @@
                 <job-name>SendMailInventarioJob</job-name>
                 <job-group>SendMailInventarioGroup</job-group>
                 <!-- Se dispara cada: segundos minutos horas DiaDelMes Mes DiaDeLaSemana Año -->
-                <cron-expression>0 0 9 ? * * *</cron-expression>
+                <cron-expression>0 0 9 ? * MON-SAT *</cron-expression>
             </cron>
         </trigger>
     </job>
