@@ -15,7 +15,7 @@
 		<dependency>
 			<groupId>com.ferbo</groupId>
 			<artifactId>gestion-tools</artifactId>
-			<version>0.0.2-SNAPSHOT</version>
+			<version>0.0.3-SNAPSHOT</version>
 		</dependency>
 		<dependency>
 			<groupId>com.ferbo</groupId>
@@ -24,13 +24,13 @@
 		</dependency>
 		<dependency>
 			<groupId>com.ferbo</groupId>
-			<artifactId>gestion-reports</artifactId>
-			<version>0.0.2-SNAPSHOT</version>
+			<artifactId>gestion-mail</artifactId>
+			<version>0.0.3-SNAPSHOT</version>
 		</dependency>
 		<dependency>
 			<groupId>com.ferbo</groupId>
-			<artifactId>gestion-mail</artifactId>
-			<version>0.0.3-SNAPSHOT</version>
+			<artifactId>gestion-reports</artifactId>
+			<version>1.0.0-SNAPSHOT</version>
 		</dependency>
 		<dependency>
 			<groupId>com.google.code.gson</groupId>

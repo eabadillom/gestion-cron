@@ -13,8 +13,28 @@
 		<description></description>
 		<servlet-class>com.ferbo.cron.servlet.ReporteInventarioServlet</servlet-class>
 	</servlet>
+	<servlet>
+		<servlet-name>ReporteEntradaServlet</servlet-name>
+		<display-name>ReporteEntradaServlet</display-name>
+		<description></description>
+		<servlet-class>com.ferbo.cron.servlet.ReporteEntradaServlet</servlet-class>
+	</servlet>
+	<servlet>
+		<servlet-name>ReporteSalidaServlet</servlet-name>
+		<display-name>ReporteSalidaServlet</display-name>
+		<description></description>
+		<servlet-class>com.ferbo.cron.servlet.ReporteSalidaServlet</servlet-class>
+	</servlet>
 	<servlet-mapping>
 		<servlet-name>ReporteInventarioServlet</servlet-name>
 		<url-pattern>/reporte-inventario</url-pattern>
+	</servlet-mapping>
+	<servlet-mapping>
+		<servlet-name>ReporteEntradaServlet</servlet-name>
+		<url-pattern>/reporte-entrada</url-pattern>
+	</servlet-mapping>
+	<servlet-mapping>
+		<servlet-name>ReporteSalidaServlet</servlet-name>
+		<url-pattern>/reporte-salida</url-pattern>
 	</servlet-mapping>
 </web-app>
