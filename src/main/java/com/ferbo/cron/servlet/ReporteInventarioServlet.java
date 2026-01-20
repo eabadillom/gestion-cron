@@ -16,9 +16,9 @@ import org.apache.logging.log4j.Logger;
 
 import com.ferbo.cron.business.SendMailInventarioBL;
 import com.ferbo.cron.model.SendMailRsp;
-import com.ferbo.gestion.business.ClienteBL;
-import com.ferbo.gestion.jasper.ReporteInventarioJR;
-import com.ferbo.gestion.model.Cliente;
+import com.ferbo.gestion.reports.jasper.ReporteInventarioJR;
+import com.ferbo.gestion.core.business.ClienteBL;
+import com.ferbo.gestion.core.model.Cliente;
 import com.ferbo.gestion.tools.DBManager;
 import com.ferbo.gestion.tools.FSTools;
 import com.google.gson.Gson;
