@@ -152,7 +152,7 @@ public class SendMailSalidasBL {
 		    		DateTools.getString(this.fechaFin, DateTools.FORMATO_DD_MM_YYYY)
 	    		);
 		    
-		    mailHTML = "/mail/mailEntradas.html";
+		    mailHTML = "/mail/mailSalidas.html";
             mailFile = new File( getClass().getResource(mailHTML).getFile() );
             mailReader = new FileReader(mailFile);
             reader = new BufferedReader(mailReader);
