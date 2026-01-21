@@ -4,7 +4,7 @@
 	<groupId>com.ferbo</groupId>
 	<artifactId>gestion-cron</artifactId>
 	<packaging>war</packaging>
-	<version>0.0.1-SNAPSHOT</version>
+	<version>0.0.2-SNAPSHOT</version>
 	<name>FERBO CRON</name>
 	<url>http://maven.apache.org</url>
 	<properties>
@@ -15,22 +15,22 @@
 		<dependency>
 			<groupId>com.ferbo</groupId>
 			<artifactId>gestion-tools</artifactId>
-			<version>0.0.2-SNAPSHOT</version>
+			<version>0.0.3-RELEASE</version>
 		</dependency>
 		<dependency>
 			<groupId>com.ferbo</groupId>
 			<artifactId>gestion-core</artifactId>
-			<version>0.0.4-SNAPSHOT</version>
-		</dependency>
-		<dependency>
-			<groupId>com.ferbo</groupId>
-			<artifactId>gestion-reports</artifactId>
-			<version>0.0.2-SNAPSHOT</version>
+			<version>0.0.5-RELEASE</version>
 		</dependency>
 		<dependency>
 			<groupId>com.ferbo</groupId>
 			<artifactId>gestion-mail</artifactId>
-			<version>0.0.2-SNAPSHOT</version>
+			<version>0.0.3-RELEASE</version>
+		</dependency>
+		<dependency>
+			<groupId>com.ferbo</groupId>
+			<artifactId>gestion-reports</artifactId>
+			<version>1.0.0-RELEASE</version>
 		</dependency>
 		<dependency>
 			<groupId>com.google.code.gson</groupId>
