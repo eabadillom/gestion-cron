@@ -5,24 +5,34 @@ import java.io.File;
 import java.io.FileReader;
 import java.sql.Connection;
 import java.sql.SQLException;
+import java.time.LocalDate;
 import java.util.ArrayList;
 import java.util.Date;
 import java.util.List;
+import java.util.regex.Matcher;
+import java.util.regex.Pattern;
+
+import javax.mail.Message;
+import javax.mail.MessagingException;
 
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 
-import com.ferbo.gestion.business.ClienteBL;
-import com.ferbo.gestion.business.ContactosBL;
-import com.ferbo.gestion.business.InventarioBO;
-import com.ferbo.gestion.dao.MailDAO;
-import com.ferbo.gestion.jasper.ReporteInventarioJR;
-import com.ferbo.gestion.model.Cliente;
-import com.ferbo.gestion.model.ClienteContacto;
-import com.ferbo.gestion.model.Contacto;
-import com.ferbo.gestion.model.Mail;
-import com.ferbo.gestion.model.MedioContacto;
+import com.ferbo.gestion.core.business.ClienteBL;
+import com.ferbo.gestion.core.business.ContactosBL;
+import com.ferbo.gestion.core.business.InventarioBO;
+import com.ferbo.gestion.core.dao.EnvioInventarioDAO;
+import com.ferbo.gestion.core.dao.IDAO;
+import com.ferbo.gestion.core.dao.MailDAO;
+import com.ferbo.gestion.core.model.Cliente;
+import com.ferbo.gestion.core.model.ClienteContacto;
+import com.ferbo.gestion.core.model.Contacto;
+import com.ferbo.gestion.core.model.EnvioInventario;
+import com.ferbo.gestion.core.model.Mail;
+import com.ferbo.gestion.core.model.MedioContacto;
+import com.ferbo.gestion.reports.jasper.ReporteInventarioJR;
 import com.ferbo.gestion.tools.DBManager;
+import com.ferbo.gestion.tools.GestionException;
 import com.ferbo.gestion.tools.IOTools;
 import com.ferbo.mail.MailHelper;
 import com.ferbo.mail.beans.Adjunto;
@@ -36,11 +46,11 @@ public class SendMailInventarioBL {
 	private Connection conn = null;
 	private ContactosBL contactosBO = null;
 	private static SendMailInventarioBL obj = null;
-	MailHelper helper = null;
+	private MailHelper helper = null;
 	private List<Correo> correosList = null;
 	private Cliente clienteActual = null;
 	private MailDAO mailDAO = null;
-	
+	private static final String SUBJECT_TEMPLATE = "Reporte de inventario %s - FERBO";
 	
 	private static boolean isRunning = false;
 	
@@ -87,18 +97,32 @@ public class SendMailInventarioBL {
 	public void sendMail(List<Cliente> clientes) throws SQLException {
 	    isRunning = true;
 	    helper = new MailHelper("mail/inventarios");
+	    List<Message> notSentList = null;
 	    
-		for(Cliente cliente : clientes) {
-			this.clienteActual = cliente;
-			log.info("----------------------------------------------------------------------------------");
-			log.info("Cliente: " + cliente.getNombre());
-			this.processContacts(cliente);
-		}
+	    InventarioBO   inventarioBO = null;
+	    inventarioBO = new InventarioBO(conn);
+	    
+	    for(Cliente cliente : clientes) {
+    		this.clienteActual = cliente;
+    		try {
+    			if(inventarioBO.tieneInventario(cliente.getIdCliente(), new Date()) == false)
+    				continue;
+    		} catch(GestionException ex) {
+    			log.info("Problema para validar la existencia de inventario del cliente...", ex);
+    		}
+    		log.info("----------------------------------------------------------------------------------");
+    		log.info("Cliente: {} - {}", cliente.getNumero(), cliente.getNombre());
+    		this.processContacts(cliente);
+    	}
+	    
 			
-		helper.sendMessages();
+		notSentList = helper.sendMessages();
+		
+		this.handleNotSent(clientes, notSentList);
+		
 		isRunning = false;
 	}
-
+	
 	private void processContacts(Cliente cliente) 
 	throws SQLException {
 	    if(cliente.isHabilitado() == false) {
@@ -156,7 +180,7 @@ public class SendMailInventarioBL {
 		StringBuilder  sb = null;
 		String         subject = null;
 		Adjunto        adjunto = null;
-		InventarioBO   inventarioBO = null;
+		
 		
 		byte[]         bytes = null;
 		List<Adjunto> attachmentList = null;
@@ -167,7 +191,7 @@ public class SendMailInventarioBL {
 		
 		try {
 		    helper.newMessage();
-		    subject = String.format("Reporte de inventario %s - FERBO", this.clienteActual.getNombre());
+		    subject = String.format(SUBJECT_TEMPLATE, this.clienteActual.getNombre());
 		    
 		    mailInventarioHTML = "/mail/mailInventario.html";
             mailInventarioFile = new File( getClass().getResource(mailInventarioHTML).getFile() );
@@ -186,14 +210,7 @@ public class SendMailInventarioBL {
 		    }
             helper.setSubject(subject);
             helper.setMailBody(html);
-		    
             
-            inventarioBO = new InventarioBO(conn);
-                
-            if(inventarioBO.tieneInventario(contactosBO.getIdCliente(), new Date()) == false)
-            	return;
-            
-            log.info(String.format("El cliente tiene inventario."));
             logoPath = "/images/logo.png";
             fileLogoPath = new File( getClass().getResource(logoPath).getFile());
             inventarioJR = new ReporteInventarioJR(conn, fileLogoPath.getPath());
@@ -229,5 +246,45 @@ public class SendMailInventarioBL {
 		    IOTools.close(reader);
 		}
 		
+	}
+	
+	private void handleNotSent(List<Cliente> clientes, List<Message> notSentList)
+	throws SQLException {
+		String regex = Pattern.quote("^".concat(SUBJECT_TEMPLATE).concat("$")).replace("%s", "(.+?)"); 
+		Pattern pattern = Pattern.compile(regex);
+		
+		List<Cliente> reprocessList = new ArrayList<Cliente>();
+		
+		for(Cliente cliente : clientes) {
+			Message encontrado = notSentList.stream()
+					.filter( m -> {
+						Matcher matcher = null;
+						try {
+							matcher = pattern.matcher(m.getSubject());
+						} catch (MessagingException e) {
+							e.printStackTrace();
+						}
+						return matcher.find() && matcher.group(1).equals(cliente.getNombre());
+					})
+					.findFirst()
+					.orElse(null)
+					;
+			if(encontrado == null)
+				continue;
+			
+			reprocessList.add(cliente);
+		}
+		
+		for(Cliente cliente : reprocessList) {
+			EnvioInventario envioInventario = EnvioInventario.builder()
+				.IdCliente(cliente.getIdCliente())
+				.FechaEnvio(LocalDate.now())
+				.Enviado(Boolean.FALSE)
+				.build();
+			
+			IDAO<EnvioInventario> envioDAO = new EnvioInventarioDAO();
+			envioDAO.insert(conn, envioInventario);
+		}
+		conn.commit();
 	}
 }
