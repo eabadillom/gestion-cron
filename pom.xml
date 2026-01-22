@@ -4,7 +4,7 @@
 	<groupId>com.ferbo</groupId>
 	<artifactId>gestion-cron</artifactId>
 	<packaging>war</packaging>
-	<version>0.0.2-RELEASE</version>
+	<version>0.0.3-RELEASE</version>
 	<name>FERBO CRON</name>
 	<url>http://maven.apache.org</url>
 	<properties>
@@ -30,7 +30,7 @@
 		<dependency>
 			<groupId>com.ferbo</groupId>
 			<artifactId>gestion-reports</artifactId>
-			<version>1.0.0-RELEASE</version>
+			<version>1.0.1-RELEASE</version>
 		</dependency>
 		<dependency>
 			<groupId>com.google.code.gson</groupId>
