@@ -1,29 +1,100 @@
-<quartz>
+<quartz xmlns="http://www.opensymphony.com/quartz/JobSchedulingData" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://www.opensymphony.com/quartz/JobSchedulingData job_scheduling_data_1_5.xsd ">
+	<!--
+	Ejemplo de expresión cron:
+	0 0 8 ? * MON *
+	┬ ┬ ┬ ┬ ┬ ┬   ┬
+	│ │ │ │ │ │   │
+	│ │ │ │ │ │   └─ Año (opcional, *)
+	│ │ │ │ │ └─── Día de la semana (MON)
+	│ │ │ │ └───── Mes (*)
+	│ │ │ └─────── Día del mes (?)
+	│ │ └───────── Hora (8)
+	│ └─────────── Minuto (0)
+	└───────────── Segundo (0)
+	-->
     <job>
         <job-detail>
-            <name>SendMailInventarioJob</name>
-            <group>SendMailInventarioJob</group>
-            <description>Job para envio de email con inventario a clientes.</description>
+            <name>MAIL_INVENTARIO_0700_Job</name>
+            <group>INVENTARIO</group>
+            <description>Envio de inventario por e-mail 7:00am</description>
             <job-class>com.ferbo.cron.SendMailInventarioJob</job-class>
             <job-data-map allows-transient-data="false">
-                <entry>
-                    <key>arg1</key>
-                    <value>nothing</value>
-                </entry>
-                <entry>
-                	<key>arg2</key>
-                    <value>nothing</value>
-                </entry>
+            	<entry>
+					<key>numeroCliente</key>
+					<value>12,119,121</value>
+            	</entry>
             </job-data-map>
         </job-detail>
         <trigger>
             <cron>
-                <name>SendMailInventarioTrigger</name>
-                <group>SendMailInventarioTriggerGroup</group>
-                <job-name>SendMailInventarioJob</job-name>
-                <job-group>SendMailInventarioGroup</job-group>
-                <!-- Se dispara cada: segundos minutos horas DiaDelMes Mes DiaDeLaSemana Año -->
-                <cron-expression>0 0 9 ? * * *</cron-expression>
+                <name>MAIL_INVENTARIO_0700_Trigger</name>
+                <group>INVENTARIO_TRIGGER</group>
+                <job-name>MAIL_INVENTARIO_0700_Job</job-name>
+                <job-group>INVENTARIO</job-group>
+                <cron-expression>0 0 7 ? * *</cron-expression>
+            </cron>
+        </trigger>
+    </job>
+    <job>
+    	<job-detail>
+            <name>MAIL_INVENTARIO_0900_Job</name>
+            <group>INVENTARIO</group>
+            <description>Envio de inventario por e-mail 9:00am</description>
+            <job-class>com.ferbo.cron.SendMailInventarioJob</job-class>
+        </job-detail>
+        <trigger>
+            <cron>
+                <name>MAIL_INVENTARIO_0900_Trigger</name>
+                <group>INVENTARIO_TRIGGER</group>
+                <job-name>MAIL_INVENTARIO_0900_Job</job-name>
+                <job-group>INVENTARIO</job-group>
+                <cron-expression>0 0 9 ? * *</cron-expression>
+            </cron>
+        </trigger>
+    </job>
+    <job>
+    	<job-detail>
+            <name>MAIL_ENTRADAS_0800_Job</name>
+            <group>INVENTARIO</group>
+            <description>Envio de ENTRADAS por e-mail 8:00am</description>
+            <job-class>com.ferbo.cron.SendMailEntradasJob</job-class>
+            <job-data-map allows-transient-data="false">
+            	<entry>
+					<key>numeroCliente</key>
+					<value>25</value>
+            	</entry>
+            </job-data-map>
+        </job-detail>
+        <trigger>
+            <cron>
+                <name>MAIL_ENTRADAS_0800_Trigger</name>
+                <group>INVENTARIO_TRIGGER</group>
+                <job-name>MAIL_ENTRADAS_0800_Job</job-name>
+                <job-group>INVENTARIO</job-group>
+                <cron-expression>0 0 8 ? * *</cron-expression>
+            </cron>
+        </trigger>
+    </job>
+    <job>
+    	<job-detail>
+            <name>MAIL_SALIDAS_0800_Job</name>
+            <group>INVENTARIO</group>
+            <description>Envio de SALIDAS por e-mail 8:00am</description>
+            <job-class>com.ferbo.cron.SendMailSalidasJob</job-class>
+            <job-data-map allows-transient-data="false">
+            	<entry>
+					<key>numeroCliente</key>
+					<value>25</value>
+            	</entry>
+            </job-data-map>
+        </job-detail>
+        <trigger>
+            <cron>
+                <name>MAIL_SALIDAS_0800_Trigger</name>
+                <group>INVENTARIO_TRIGGER</group>
+                <job-name>MAIL_SALIDAS_0800_Job</job-name>
+                <job-group>INVENTARIO</job-group>
+                <cron-expression>0 0 8 ? * *</cron-expression>
             </cron>
         </trigger>
     </job>
