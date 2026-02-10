@@ -71,7 +71,7 @@
                 <group>INVENTARIO_TRIGGER</group>
                 <job-name>MAIL_ENTRADAS_0800_Job</job-name>
                 <job-group>INVENTARIO</job-group>
-                <cron-expression>0 0 8 ? * *</cron-expression>
+                <cron-expression>0 0 8 ? * MON</cron-expression>
             </cron>
         </trigger>
     </job>
@@ -94,7 +94,7 @@
                 <group>INVENTARIO_TRIGGER</group>
                 <job-name>MAIL_SALIDAS_0800_Job</job-name>
                 <job-group>INVENTARIO</job-group>
-                <cron-expression>0 0 8 ? * *</cron-expression>
+                <cron-expression>0 0 8 ? * MON</cron-expression>
             </cron>
         </trigger>
     </job>
