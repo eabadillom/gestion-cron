@@ -14,6 +14,7 @@ import javax.mail.Message;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 
+import com.ferbo.gestion.core.business.ClienteBL;
 import com.ferbo.gestion.core.business.ContactosBL;
 import com.ferbo.gestion.core.dao.MailDAO;
 import com.ferbo.gestion.core.model.Cliente;
@@ -22,8 +23,10 @@ import com.ferbo.gestion.core.model.Contacto;
 import com.ferbo.gestion.core.model.Mail;
 import com.ferbo.gestion.core.model.MedioContacto;
 import com.ferbo.gestion.reports.jasper.ReporteEntradasJR;
+import com.ferbo.gestion.tools.DBManager;
 import com.ferbo.gestion.tools.DateTools;
 import com.ferbo.gestion.tools.IOTools;
+import com.ferbo.gestion.tools.model.Periodo;
 import com.ferbo.mail.MailHelper;
 import com.ferbo.mail.beans.Adjunto;
 import com.ferbo.mail.beans.Correo;
@@ -60,6 +63,33 @@ public class SendMailEntradasBL {
 		//TODO pendiente implementar la ejecución general para todos los clientes.
 	}
 	
+	public void exec(Periodo periodo, String... numerosCliente) {
+		List<Cliente> clientes = new ArrayList<Cliente>();
+	    ClienteBL clienteBO = null;
+	    try {
+	        this.conn = DBManager.getConnection();
+	        
+	        clienteBO = new ClienteBL(conn);
+	        
+	        if(isRunning == false) {
+	        	
+	        	for(String numero : numerosCliente) {
+	        		Cliente cliente = clienteBO.get(numero);
+	        		clientes.add(cliente);
+	        	}
+	            
+                this.sendMail(clientes, periodo.getFechaInicio(), periodo.getFechaFin());
+	        } else {
+	            log.info("El proceso de envío de reportes de entradas ya se encuentra en ejecución.");
+	        }
+	        
+	    } catch(Exception ex) {
+	        log.error("Problema para realizar el envío de reporte de salidas automático...", ex);
+	    } finally {
+	        DBManager.close(this.conn);
+	    }
+	}
+	
 	public synchronized void sendMail(List<Cliente> clientes, Date fechaInicio, Date fechaFin)
 	throws SQLException {
 		this.fechaInicio = fechaInicio;
@@ -74,6 +104,7 @@ public class SendMailEntradasBL {
 			this.processContacts(cliente);
 		}
 		notSentList = helper.sendMessages();
+		log.info("Mensajes no enviados: {}", notSentList.size());
 		
 		isRunning = false;
 	}
@@ -98,7 +129,7 @@ public class SendMailEntradasBL {
 			}
 			
 			if(clienteContacto.isInventario() == false) {
-			    log.info("Contacto no habilitado para envío de reportes de inventario..." + clienteContacto);
+			    log.info("Contacto no habilitado para envío de reportes de entradas..." + clienteContacto);
 			    continue;
 			}
 			

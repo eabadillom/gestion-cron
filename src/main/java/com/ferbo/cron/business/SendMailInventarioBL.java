@@ -94,6 +94,33 @@ public class SendMailInventarioBL {
 	    }
 	}
 	
+	public void exec(String... numerosCliente) {
+		List<Cliente> clientes = new ArrayList<Cliente>();
+	    ClienteBL clienteBO = null;
+	    try {
+	        this.conn = DBManager.getConnection();
+	        
+	        clienteBO = new ClienteBL(conn);
+	        
+	        if(isRunning == false) {
+	        	
+	        	for(String numero : numerosCliente) {
+	        		Cliente cliente = clienteBO.get(numero);
+	        		clientes.add(cliente);
+	        	}
+	            
+                this.sendMail(clientes);
+	        } else {
+	            log.info("El proceso de envío de reportes de inventario ya se encuentra en ejecución.");
+	        }
+	        
+	    } catch(Exception ex) {
+	        log.error("Problema para realizar el envío de reporte de inventario automático...", ex);
+	    } finally {
+	        DBManager.close(this.conn);
+	    }
+	}
+	
 	public void sendMail(List<Cliente> clientes) throws SQLException {
 	    isRunning = true;
 	    helper = new MailHelper("mail/inventarios");
