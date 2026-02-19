@@ -22,10 +22,12 @@ public class SendMailInventarioJob implements Job {
 		
 		String numeroCliente = (String) parametros.get("numeroCliente");
 		
-		if(numeroCliente == null)
+		if(numeroCliente == null) {
+			log.info("Ejecutando Job SendMailInventarioJob para todos los clientes...");
 			sendMailBO.exec();
-		else {
+		} else {
 			String[] numerosCliente = numeroCliente.split(",");
+			log.info("Ejecutando Job SendMailInventarioJob para los clientes {}...", (Object[])numerosCliente);
 			sendMailBO.exec(numerosCliente);
 		}
 		
