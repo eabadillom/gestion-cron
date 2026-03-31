@@ -1,12 +1,12 @@
-#Gestion - Calendarizador de tareas
+# Gestion - Calendarizador de tareas
 Este componente proporciona un calendarizador de tareas para el sistema de inventarios, facturación y cobranza de FERBO (Gestion).
 
-##Almacén
+## Almacén
 - Envío automático de inventario.
 - Envío automático de ingresos.
 - Envío automático de retiros.
 
-##Dependencias
+## Dependencias
 - gestion-tools
 - gestion-core
 - gestion-mail
